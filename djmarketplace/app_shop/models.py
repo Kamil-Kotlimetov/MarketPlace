@@ -17,7 +17,7 @@ class Profile(models.Model): #1
 
     def add_balance(self, amount): #3
         Profile.objects.select_for_update().only('balance')\
-            .filter(pk=self.pk).update(balance=F('balance') + amount)
+            .filter(pk=self.pk).update(balance=F('balance') + amount) #F - меняем на стороне базы данных
 
     def sub_balance(self, amount):
         Profile.objects.select_for_update().only('balance')\
