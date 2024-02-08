@@ -19,6 +19,11 @@ class UserUpdateView(UpdateView):
     fields = ('username', 'first_name', 'last_name', 'email')
     template_name = 'app_shop/profile.html'
 
+    def get_context_data(self, **kwargs):
+        context = super(UserUpdateView, self).get_context_data(**kwargs)
+        context['orders'] = Order.objects.prefetch_related('cart_good').filter(user=self.request.user).order_by('-date')
+        return context
+
     def get_success_url(self):
         return reverse('profile', kwargs={'pk': self.request.user.pk})
 
@@ -45,6 +50,27 @@ class CartView(LoginRequiredMixin, View): #6 (06.02.)
             cart = None
 
         return render(self.request, 'app_shop/cart.html', context={'cart': cart, 'total_price': total_price})
+
+
+@require_POST
+def pay(request, pk): #8 (08.02.)
+
+    profile = get_object_or_404(Profile, user=request.user)
+    with transaction.atomic():
+        cart = GoodCart.objects.filter(user=request.user, payment_flag='n')
+        amount = sum([i_item.good.price * i_item.good_num for i_item in cart])
+        if amount > profile.balance:
+            messages.add_message(request, messages.ERROR, 'Недостаточно средств! Пополните баланс')
+            return redirect('profile', request.user.pk)
+        order = Order.objects.create(user=request.user, amount=amount)
+        order.cart_good.add(*cart)
+        cart.update(payment_flag='p')
+        profile.sub_balance(amount)
+        profile.update_status(amount)
+        order.save()
+    messages.add_message(request, messages.SUCCESS, 'Payment completed')
+    return redirect('main')
+
 
 @require_POST
 @login_required(login_url='login', redirect_field_name='main')

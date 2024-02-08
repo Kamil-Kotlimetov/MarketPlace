@@ -1,11 +1,15 @@
 {% extends 'app_shop/base.html' %}
+<!--№6-->
 
 {% block main %}
     {% if cart %}
         <div class="d-flex flex-wrap">
             {% for item in cart %}
-                <div class="d-flex flex-column me-5 mb-3 p-2 border border-secondary align-items-center">
-                    <h3>{{item.good.name}}</h3>
+                <div class="d-flex flex-column me-5 mb-3 p-2 border border-secondary align-items-center position-relative">
+                    <span class="position-absolute top-0 end-0">
+                        <img width="80" height="50" src="{{item.good.shop.log.url}}"> <!--(08.02.) добавили только эту строчку-->
+                    </span>
+                    <h3 class="pt-5">{{item.good.name}}</h3>
                     <span>{{item.good.category.name}}</span>
                     <img width="100" height="" src="{{item.good.image.url}}">
                     <span>Price: {{item.good.price}} RUB.</span>
@@ -15,7 +19,10 @@
             {% endfor %}
         </div>
         <h3>Total price {{total_price}} RUB.</h3>
-        <button class="btn btn-primary">Pay</button>
+        <form method="post" action="{% url 'pay' request.user.pk %}"> <!--(08.02.)-->
+            {% csrf_token %}
+            <button class="btn btn-primary">Pay</button>
+        </form>
     {% else %}
     <h4>No goods in cart</h4>
     {% endif %}

@@ -1,6 +1,14 @@
 {% extends 'app_shop/base.html' %}
 <!--№2-->
 {% block main %}
+{% if messages %} <!--(08.02.)-->
+    {% for i_message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          <strong>Payment</strong> complete.
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
     <h4>Average price in our marketplaces is {{avg_price|floatformat:2}} RUB.</h4>
     <div class="d-flex justify-content-start mt-5">
         {% for i_good in goods %}
